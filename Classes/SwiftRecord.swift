@@ -336,23 +336,26 @@ extension NSManagedObject {
     }
     
     // Creation / Deletion
-    @nonobjc public static func create() -> NSManagedObject {
+    @nonobjc public static func create() -> Self {
         return self.create(context: NSManagedObjectContext.defaultContext)
     }
     
-    @nonobjc public static func create(context: NSManagedObjectContext) -> NSManagedObject {
+    @nonobjc public static func create(context: NSManagedObjectContext) -> Self {
         let o = NSEntityDescription.insertNewObject(forEntityName: self.entityName(), into: context) as NSManagedObject
         if let idprop = self.autoIncrementingId() {
             o.setPrimitiveValue(NSNumber(value: self.nextId() as Int), forKey: idprop)
         }
-        return o
+        return returnSelf(fromManagedObject: o)
+    }
+    private class func returnSelf<T>(fromManagedObject managedObject: NSManagedObject) -> T {
+        return managedObject as! T
     }
     
-    @nonobjc public static func create(properties: [String: Any]) -> NSManagedObject {
+    @nonobjc public static func create(properties: [String: Any]) -> Self {
         return self.create(properties, context: NSManagedObjectContext.defaultContext)
     }
     
-    @nonobjc public static func create(_ properties: [String: Any], context: NSManagedObjectContext) -> NSManagedObject {
+    @nonobjc public static func create(_ properties: [String: Any], context: NSManagedObjectContext) -> Self {
         let newEntity: NSManagedObject = self.create(context: context)
         newEntity.update(properties)
         if let idprop = self.autoIncrementingId() {
@@ -360,9 +363,9 @@ extension NSManagedObject {
                 newEntity.setPrimitiveValue(NSNumber(value: self.nextId() as Int), forKey: idprop)
             }
         }
-        return newEntity
+        return returnSelf(fromManagedObject:newEntity)
     }
-    
+
     public static func autoIncrements() -> Bool {
         return self.autoIncrementingId() != nil
     }
